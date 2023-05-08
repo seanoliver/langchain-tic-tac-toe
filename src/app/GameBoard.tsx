@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Row from './Row';
 import { checkForWinner } from '@/lib/helpers';
+import { get } from 'http';
 
 // The board is a 3x3 grid.
 type BoardState = (null | string)[][];
@@ -37,7 +38,7 @@ export default function GameBoard(): JSX.Element {
 	/**
 	 * Reset the board.
 	 */
-	const handleReser = () => {
+	const handleReset = () => {
 		setBoardState(initialBoardState);
 		setCurrentPlayer('X');
 	};
@@ -46,7 +47,6 @@ export default function GameBoard(): JSX.Element {
 	 * Get the AI's move.
 	 * @param boardState The current board state.
 	 * @returns void
-	 * @todo Make this a serverless function.
 	 */
 	async function getTicTacToeAIMove(boardState: BoardState) {
 		const response = await fetch('/api/openai', {
@@ -62,6 +62,8 @@ export default function GameBoard(): JSX.Element {
 		handleClick(row, col);
 	}
 
+	if (currentPlayer === 'O') getTicTacToeAIMove(boardState);
+
 	useEffect(() => {
 		// Check for winner.
 		const winner = checkForWinner(boardState);
@@ -69,7 +71,6 @@ export default function GameBoard(): JSX.Element {
 			console.log(`Winner: ${winner}`);
 			return;
 		}
-		if (currentPlayer === 'O') getTicTacToeAIMove(boardState);
 	}, [boardState]);
 
 	return (

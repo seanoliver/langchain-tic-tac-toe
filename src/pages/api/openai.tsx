@@ -1,6 +1,6 @@
 import { OpenAI } from 'langchain/llms/openai';
-import { PromptTemplate } from 'langchain/prompts';
-import { LLMChain } from 'langchain/chains';
+import { BufferMemory } from 'langchain/memory';
+import { ConversationChain } from 'langchain/chains';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { checkIfValidMove } from '@/lib/helpers';
 
@@ -8,11 +8,14 @@ export default async function getMove(
 	req: NextApiRequest,
 	res: NextApiResponse
 ): Promise<void> {
-	const llm = new OpenAI(process.env.OPENAI_API_KEY);
+	const { boardState, currentPlayer } = req.body;
 
-	const template =
-		'Given the tic-tac-toe board state {boardState}, please provide the optimal next move ' +
-		'for player {player}. Output the move as a two-item array in a format that aligns ' +
+	const llm = new OpenAI(process.env.OPENAI_API_KEY);
+	const memory = new BufferMemory();
+	const chain = new ConversationChain({ llm, memory });
+	const prompt =
+		`Given the tic-tac-toe board state ${boardState}, please provide the optimal next move ` +
+		`for player ${currentPlayer}. Output the move as a two-item array in a format that aligns ` +
 		'with the following instructions:' +
 		'\n\n' +
 		'Do not include any other characters in the output. Do not include spaces. ' +
@@ -39,43 +42,29 @@ export default async function getMove(
 		'be 0,2. ' +
 		'\n\n' +
 		'And so on. ';
-	const prompt = new PromptTemplate({
-		template: template,
-		inputVariables: ['boardState', 'player'],
-	});
-	const { boardState, player } = req.body;
 
-	console.log('boardState for AI', boardState);
-
-	const chain = new LLMChain({ llm, prompt });
-
-	const response = await chain.call({
-		boardState: JSON.stringify(boardState),
-		player,
-	});
+	const response = await chain.call({ input: prompt });
 	// Parse the response into a row and column.
-	console.log('response', response);
-	const [row, col]: number[] = response
-		.text
-		.trim()
+
+	let [row, col]: number[] = response
+		.response
+		.match(/\d,\d/)[0]
 		.split(',')
 		.map((n: string) => Number(n));
 	console.log('boardState', boardState);
 
-	while (checkIfValidMove(boardState, row, col) === false) {
-		console.log('invalid move');
-		const response = await chain.call({
-			boardState: JSON.stringify(boardState),
-			player,
-		});
-		// Parse the response into a row and column.
-		console.log('response', response);
-		const [row, col]: number[] = response
-			.text
-			.trim()
+	// If the move is not valid, ask the user for a valid move.
+	while(!checkIfValidMove(boardState, row, col)) {
+		console.log('invalid: row, col', row, col);
+		const newResponse = await chain.call({ input: `The move ${row},${col} is not valid. Please provide a valid move.` });
+		console.log('newResponse', newResponse);
+		const [newRow, newCol]: number[] = newResponse
+			.response
+			.match(/\d,\d/)[0]
 			.split(',')
 			.map((n: string) => Number(n));
-		console.log('boardState', boardState);
+			row = newRow;
+			col = newCol;
 	}
 
 	const yourResult = { row, col };
