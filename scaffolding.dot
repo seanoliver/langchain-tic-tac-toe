@@ -1,0 +1,8 @@
+digraph G {
+    splines="FALSE";
+    rankdir="LR";
+
+    App -> GameBoard -> Cell
+    App -> Title
+    App -> Menu
+}
