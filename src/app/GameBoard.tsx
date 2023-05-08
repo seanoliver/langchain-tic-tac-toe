@@ -19,7 +19,7 @@ const initialBoardState: BoardState = [
 export default function GameBoard(): JSX.Element {
 	const [boardState, setBoardState] = useState<BoardState>(initialBoardState);
 	const [currentPlayer, setCurrentPlayer] = useState<'X' | 'O'>('X');
-	const [winner, setWinner] = useState<string | null>(null);
+	const [winner, setWinner] = useState<string | boolean>(false);
 
 	/**
 	 * Handle a click on a cell.
@@ -28,19 +28,12 @@ export default function GameBoard(): JSX.Element {
 	 * @returns void
 	 */
 	const handleClick = (row: number, col: number) => {
+		if (winner) return;
 		const newBoardState = [...boardState];
 		console.log('row, col, currentPlayer', row, col, currentPlayer);
 		newBoardState[row][col] = currentPlayer;
 		setBoardState(newBoardState);
-		setCurrentPlayer(currentPlayer === 'X' ? 'O' : 'X');
-	};
-
-	/**
-	 * Reset the board.
-	 */
-	const handleReset = () => {
-		setBoardState(initialBoardState);
-		setCurrentPlayer('X');
+		setCurrentPlayer(c => c === 'X' ? 'O' : 'X');
 	};
 
 	/**
@@ -49,6 +42,7 @@ export default function GameBoard(): JSX.Element {
 	 * @returns void
 	 */
 	async function getTicTacToeAIMove(boardState: BoardState) {
+		if (winner) return;
 		const response = await fetch('/api/openai', {
 			method: 'POST',
 			headers: {
@@ -61,20 +55,34 @@ export default function GameBoard(): JSX.Element {
 		const { row, col } = data.result;
 		handleClick(row, col);
 	}
-
+	console.log('currentPlayer', currentPlayer);
 	if (currentPlayer === 'O') getTicTacToeAIMove(boardState);
 
+	/**
+	 * Reset the board.
+	 */
+	const handleReset = () => {
+		setBoardState(initialBoardState);
+		setCurrentPlayer('X');
+		setWinner(false);
+	};
+
+	// TODO: Still runs after winner is set.
 	useEffect(() => {
 		// Check for winner.
-		const winner = checkForWinner(boardState);
-		if (winner) {
-			console.log(`Winner: ${winner}`);
-			return;
-		}
+		const outcome = checkForWinner(boardState);
+		if (outcome) setWinner(outcome);
+
 	}, [boardState]);
 
 	return (
-		<div className='GameBoard flex items-center justify-center rounded-lg bg-gray-200 h-80 w-80 animate-fade-in-up'>
+		<div className='GameBoard flex items-center flex-col justify-center rounded-lg bg-gray-200 h-80 w-80 animate-fade-in-up'>
+			{/* TODO: adjust so it doesn't push the game board down */}
+			{winner && (
+				<div className='GameBoard-winner justify-center items-center text-2xl text-indigo-400 font-bold'>
+					{winner} wins!
+				</div>
+			)}
 			<div className='GameBoard-inner flex flex-col gap-2'>
 				{boardState.map((rowArr, i) => (
 					<Row

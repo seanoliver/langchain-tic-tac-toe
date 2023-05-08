@@ -1,4 +1,4 @@
-export function checkForWinner(board: (string | null)[][]) {
+export function checkForWinner(board: (string | null)[][]): string | boolean {
     const winningCombos = [];
 
     // rows
