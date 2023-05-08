@@ -5,9 +5,9 @@ export default function Row({
 	rowNum,
 	handleClick,
 }: {
-	rowArr: string[] | null[];
+	rowArr: (string | null)[];
 	rowNum: number;
-	handleClick: Function;
+	handleClick: (row: number, col: number) => void;
 }) {
 	return (
 		<div className='GameBoard-row flex justify-center items-center gap-2'>
