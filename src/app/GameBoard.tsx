@@ -74,15 +74,16 @@ export default function GameBoard(): JSX.Element {
 	 * Reset the board.
 	 */
 	const handleReset = () => {
-		setBoardState(initialBoardState);
+		const resetBoardState = initialBoardState.map(row => row.map(() => null));
+		setBoardState(resetBoardState);
 		setCurrentPlayer('X');
 		setWinner(false);
 	};
 
 	useEffect(() => {
 		// Check for winner.
-		setWinner(checkForWinner(boardState));
-		// TODO: Add conditions for tie based on state in render.
+		const winnerValue = checkForWinner(boardState);
+		setWinner(winnerValue);
 	}, [boardState]);
 
 	return (
@@ -107,11 +108,21 @@ export default function GameBoard(): JSX.Element {
 			</div>
 			{/* TODO: Get rid of AI is thinking message once winner is declared. */}
 			{/* TODO: adjust so it doesn't push the game board down */}
-			{winner && (
+			{ winner === 'Tie' && (
+				<div className='GameBoard-winner justify-center items-center text-2xl text-indigo-400 font-bold'>
+					Tie!
+					<button
+						onClick={() => handleReset()}
+						className='GameBoard-reset bg-indigo-400 text-white rounded-lg px-4 py-2'>
+						Reset
+					</button>
+				</div>
+			)}
+			{winner && winner !== 'Tie' && (
 				<div className='GameBoard-winner justify-center items-center text-2xl text-indigo-400 font-bold'>
 					{winner} wins!
 					<button
-						onClick={handleReset}
+						onClick={() => handleReset()}
 						className='GameBoard-reset bg-indigo-400 text-white rounded-lg px-4 py-2'>
 						Reset
 					</button>
