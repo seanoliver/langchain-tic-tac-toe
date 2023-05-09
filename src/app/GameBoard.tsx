@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Row from './Row';
-import { checkForWinner } from '@/lib/helpers';
-import { get } from 'http';
+import { checkForWinner, optimalMove } from '@/lib/helpers';
+import { Board, Move } from '@/lib/types';
 
 // The board is a 3x3 grid.
-type BoardState = (null | string)[][];
-const initialBoardState: BoardState = [
+const initialBoardState: Board = [
 	[null, null, null],
 	[null, null, null],
 	[null, null, null],
@@ -17,9 +16,9 @@ const initialBoardState: BoardState = [
  * Render a tic-tac-toe board.
  */
 export default function GameBoard(): JSX.Element {
-	const [boardState, setBoardState] = useState<BoardState>(initialBoardState);
+	const [boardState, setBoardState] = useState<Board>(initialBoardState);
 	const [currentPlayer, setCurrentPlayer] = useState<'X' | 'O'>('X');
-	const [winner, setWinner] = useState<string | boolean>(false);
+	const [winner, setWinner] = useState<'X' | 'O' | 'Tie' | boolean>(false);
 
 	/**
 	 * Handle a click on a cell.
@@ -27,7 +26,7 @@ export default function GameBoard(): JSX.Element {
 	 * @param col The column of the cell.
 	 * @returns void
 	 */
-	const handleClick = (row: number, col: number) => {
+	const makeMove = (row: number, col: number) => {
 		if (winner) return;
 		const newBoardState = [...boardState];
 		console.log('row, col, currentPlayer', row, col, currentPlayer);
@@ -41,22 +40,35 @@ export default function GameBoard(): JSX.Element {
 	 * @param boardState The current board state.
 	 * @returns void
 	 */
-	async function getTicTacToeAIMove(boardState: BoardState) {
+	// async function getTicTacToeAIMove(boardState: Board) {
+	// 	optimalMove(boardState);
+	// 	if (winner) return;
+	// 	const response = await fetch('/api/openai', {
+	// 		method: 'POST',
+	// 		headers: {
+	// 			'Content-Type': 'application/json',
+	// 		},
+	// 		body: JSON.stringify({ boardState, currentPlayer }),
+	// 	});
+	// 	const data = await response.json();
+	// 	console.log('data', data);
+	// 	const { row, col } = data.result;
+	// 	handleClick(row, col);
+	// }
+
+	// console.log('currentPlayer', currentPlayer);
+	// if (currentPlayer === 'O') getTicTacToeAIMove(boardState);
+
+	/**
+	 * Get the computer's move.
+	 */
+	const getComputerMove = () => {
 		if (winner) return;
-		const response = await fetch('/api/openai', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ boardState, currentPlayer }),
-		});
-		const data = await response.json();
-		console.log('data', data);
-		const { row, col } = data.result;
-		handleClick(row, col);
-	}
-	console.log('currentPlayer', currentPlayer);
-	if (currentPlayer === 'O') getTicTacToeAIMove(boardState);
+		const { row, col } = optimalMove(boardState);
+		makeMove(row, col);
+	};
+
+	if (currentPlayer === 'O') getComputerMove();
 
 	/**
 	 * Reset the board.
@@ -69,8 +81,8 @@ export default function GameBoard(): JSX.Element {
 
 	useEffect(() => {
 		// Check for winner.
-		const outcome = checkForWinner(boardState);
-		if (outcome) setWinner(outcome);
+		setWinner(checkForWinner(boardState));
+		// TODO: Add conditions for tie based on state in render.
 	}, [boardState]);
 
 	return (
@@ -82,7 +94,7 @@ export default function GameBoard(): JSX.Element {
 							key={`row-${i}`}
 							rowArr={rowArr}
 							rowNum={i}
-							handleClick={handleClick}
+							handleClick={makeMove}
 						/>
 					))}
 				</div>
