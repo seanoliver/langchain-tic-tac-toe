@@ -5,8 +5,8 @@ const inter = Inter({ subsets: ['latin'] });
 const raleway = Raleway({ subsets: ['latin'] });
 
 export const metadata = {
-	title: 'Chain Gang',
-	description: 'Fun with LangChain, TypeScript, and Next.js',
+	title: 'Tic Tac Toe',
+	description: 'Simple fun with LangChain, TypeScript, and Next.js',
 };
 
 export default function RootLayout({
