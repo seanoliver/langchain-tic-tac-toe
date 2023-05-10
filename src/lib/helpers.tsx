@@ -82,11 +82,15 @@ export function optimalMove(board: Board): Move {
  */
 function minimax(board: Board, depth: number, isMaximizing: boolean): number {
 	const winner = checkForWinner(board);
-	if (winner !== null) {
-		return winner === computerPlayer ? 10 - depth : depth - 10;
-	}
-
-	if (isFull(board)) return 0;
+	if (winner !== false) {
+		if (winner === computerPlayer) {
+		  return 10 - depth;
+		} else if (winner === humanPlayer) {
+		  return -10 + depth;
+		} else {
+		  return 0;
+		}
+	  }
 
 	// MAXIMIZING PLAYER
 	if (isMaximizing) {

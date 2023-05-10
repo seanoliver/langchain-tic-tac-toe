@@ -12,20 +12,13 @@ const initialBoardState: Board = [
 	[null, null, null],
 ];
 
-/**
- * Render a tic-tac-toe board.
- */
+/** Render a tic-tac-toe board. */
 export default function GameBoard(): JSX.Element {
 	const [boardState, setBoardState] = useState<Board>(initialBoardState);
 	const [currentPlayer, setCurrentPlayer] = useState<'X' | 'O'>('X');
 	const [winner, setWinner] = useState<'X' | 'O' | 'Tie' | boolean>(false);
 
-	/**
-	 * Handle a click on a cell.
-	 * @param row The row of the cell.
-	 * @param col The column of the cell.
-	 * @returns void
-	 */
+	/** Handle a click on a cell. */
 	const makeMove = (row: number, col: number) => {
 		if (winner) return;
 		const newBoardState = [...boardState];
@@ -35,33 +28,7 @@ export default function GameBoard(): JSX.Element {
 		setCurrentPlayer(c => (c === 'X' ? 'O' : 'X'));
 	};
 
-	/**
-	 * Get the AI's move.
-	 * @param boardState The current board state.
-	 * @returns void
-	 */
-	// async function getTicTacToeAIMove(boardState: Board) {
-	// 	optimalMove(boardState);
-	// 	if (winner) return;
-	// 	const response = await fetch('/api/openai', {
-	// 		method: 'POST',
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 		},
-	// 		body: JSON.stringify({ boardState, currentPlayer }),
-	// 	});
-	// 	const data = await response.json();
-	// 	console.log('data', data);
-	// 	const { row, col } = data.result;
-	// 	handleClick(row, col);
-	// }
-
-	// console.log('currentPlayer', currentPlayer);
-	// if (currentPlayer === 'O') getTicTacToeAIMove(boardState);
-
-	/**
-	 * Get the computer's move.
-	 */
+	/** Get the computer's move. */
 	const getComputerMove = () => {
 		if (winner) return;
 		const { row, col } = optimalMove(boardState);
@@ -70,9 +37,7 @@ export default function GameBoard(): JSX.Element {
 
 	if (currentPlayer === 'O') getComputerMove();
 
-	/**
-	 * Reset the board.
-	 */
+	/** Reset the board. */
 	const handleReset = () => {
 		const resetBoardState = initialBoardState.map(row => row.map(() => null));
 		setBoardState(resetBoardState);
@@ -100,13 +65,6 @@ export default function GameBoard(): JSX.Element {
 					))}
 				</div>
 			</div>
-			<div
-				className={`GameBoard-winner justify-center items-center text-2xl text-indigo-400 font-bold ${
-					currentPlayer === 'O' ? 'visible' : 'invisible'
-				}`}>
-				AI is thinking...
-			</div>
-			{/* TODO: Get rid of AI is thinking message once winner is declared. */}
 			{/* TODO: adjust so it doesn't push the game board down */}
 			{ winner === 'Tie' && (
 				<div className='GameBoard-winner justify-center items-center text-2xl text-indigo-400 font-bold'>
