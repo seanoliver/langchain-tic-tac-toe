@@ -26,6 +26,7 @@ export default function GameBoard(): JSX.Element {
 		newBoardState[row][col] = currentPlayer;
 		setBoardState(newBoardState);
 		setCurrentPlayer(c => (c === 'X' ? 'O' : 'X'));
+		setWinner(checkForWinner(newBoardState));
 	};
 
 	/** Get the computer's move. */
