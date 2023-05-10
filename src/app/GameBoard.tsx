@@ -68,8 +68,8 @@ export default function GameBoard(): JSX.Element {
 			</div>
 			{/* TODO: adjust so it doesn't push the game board down */}
 			{ winner === 'Tie' && (
-				<div className='GameBoard-winner justify-center items-center text-2xl text-indigo-400 font-bold'>
-					Tie!
+				<div className='GameBoard-winner justify-center text-center items-center text-2xl text-indigo-400 font-bold'>
+					<p className="pb-3">Tie!</p>
 					<button
 						onClick={() => handleReset()}
 						className='GameBoard-reset bg-indigo-400 text-white rounded-lg px-4 py-2'>
@@ -78,8 +78,8 @@ export default function GameBoard(): JSX.Element {
 				</div>
 			)}
 			{winner && winner !== 'Tie' && (
-				<div className='GameBoard-winner justify-center items-center text-2xl text-indigo-400 font-bold'>
-					{winner} wins!
+				<div className='GameBoard-winner justify-center text-center items-center text-2xl text-indigo-400 font-bold'>
+					<p className="pb-3">{winner} wins!</p>
 					<button
 						onClick={() => handleReset()}
 						className='GameBoard-reset bg-indigo-400 text-white rounded-lg px-4 py-2'>
